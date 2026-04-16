@@ -1,0 +1,29 @@
+.env
+.env.*
+*.env
+
+# Python artifacts
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Virtual environments
+venv/
+.venv/
+
+# Build/dist
+build/
+dist/
+
+# Local IDE/editor files
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# Coverage / test artifacts
+.coverage
+.coverage.*
+test_db.sqlite3
+

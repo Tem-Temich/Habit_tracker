@@ -2,11 +2,19 @@ from rest_framework import serializers
 from accounts.models import User
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+
     class Meta:
         model = User
-        fields = ("email", "telegram_chat_id", "telegram_username", "username", "password")
+        fields = (
+            "email",
+            "telegram_chat_id",
+            "telegram_username",
+            "username",
+            "password",
+        )
 
     def create(self, validated_data):
         password = validated_data.pop("password")
@@ -15,6 +23,11 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     username_field = "email"
 
+
+# End of file
+# EOF
+# EOF2

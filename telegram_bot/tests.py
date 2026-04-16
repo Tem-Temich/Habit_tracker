@@ -1,3 +1,1 @@
-from django.test import TestCase
-
-# Create your tests here.
+"""Tests for telegram_bot app (pytest discovery via `test_*.py`)."""
