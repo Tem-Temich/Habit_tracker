@@ -63,8 +63,8 @@ Re-login after adding user to docker group.
 On server prepare project directory (example):
 
 ```bash
-mkdir -p /opt/habit_tracker
-cd /opt/habit_tracker
+mkdir -p /var/www/drf_project
+cd /var/www/drf_project
 git clone <YOUR_REPOSITORY_URL> .
 cp .env.template .env
 ```
@@ -77,8 +77,10 @@ Configure repository secrets:
 - `SERVER_USER` - SSH user
 - `SERVER_PORT` - SSH port (usually `22`)
 - `SERVER_SSH_KEY` - private key for deployment
-- `PROJECT_PATH` - absolute path on server (e.g. `/opt/habit_tracker`)
+- `PROJECT_PATH` - absolute path on server (e.g. `/var/www/drf_project`)
 - `SERVER_ENV_FILE` - full content of production `.env` file
+- `GHCR_USERNAME` - GitHub username with access to package
+- `GHCR_TOKEN` - GitHub token/PAT with `read:packages`
 
 ## Auto-deploy behavior
 
@@ -86,14 +88,14 @@ On push to `main`:
 
 1. image is built and pushed to GHCR
 2. workflow connects to server through SSH
-3. server updates `.env`
-4. `docker compose -f deploy/docker-compose.prod.yml pull`
+3. server updates code to `origin/main` and rewrites `.env`
+4. server logs in to GHCR and pulls image
 5. `docker compose -f deploy/docker-compose.prod.yml up -d`
 
 ## Quick verification on server
 
 ```bash
-cd /opt/habit_tracker
+cd /var/www/drf_project
 docker compose -f deploy/docker-compose.prod.yml ps
 docker compose -f deploy/docker-compose.prod.yml logs --tail=100 web
 ```

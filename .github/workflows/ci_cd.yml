@@ -93,7 +93,10 @@ jobs:
           script: |
             set -e
             cd "${{ secrets.PROJECT_PATH }}"
+            git fetch --all
+            git reset --hard origin/main
             echo "${{ secrets.SERVER_ENV_FILE }}" > .env
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
             export DOCKER_IMAGE="${{ env.IMAGE_NAME }}"
             export IMAGE_TAG="${{ github.sha }}"
             docker compose -f deploy/docker-compose.prod.yml pull
