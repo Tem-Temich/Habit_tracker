@@ -1,6 +1,7 @@
 .env
 .env.*
 *.env
+!.env.template
 
 # Python artifacts
 __pycache__/

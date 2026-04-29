@@ -1,0 +1,15 @@
+[Unit]
+Description=Habit Tracker Celery Beat
+After=network.target redis-server.service
+
+[Service]
+User=deploy
+Group=www-data
+WorkingDirectory=/opt/habit_tracker
+EnvironmentFile=/opt/habit_tracker/.env
+ExecStart=/opt/habit_tracker/.venv/bin/celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
