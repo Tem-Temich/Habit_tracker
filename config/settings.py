@@ -14,10 +14,13 @@ from pathlib import Path
 from datetime import timedelta
 import os
 import sys
+import environ
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+environ.Env.read_env(BASE_DIR / ".env")
+env = environ.Env()
 
 
 # Quick-start development settings - unsuitable for production
@@ -28,14 +31,14 @@ DEFAULT_SECRET_KEY = (
     "django-insecure-nl3@1##83)fkyq_c+rgux@8$b=3erfx*dp1qi9=s^bao+e$"
     "%#b"
 )
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", DEFAULT_SECRET_KEY)
+SECRET_KEY = env("DJANGO_SECRET_KEY", default=DEFAULT_SECRET_KEY)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool("DJANGO_DEBUG", default=True)
 
 ALLOWED_HOSTS = [
     h.strip()
-    for h in os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",")
+    for h in env("DJANGO_ALLOWED_HOSTS", default="*").split(",")
     if h.strip()
 ]
 
@@ -58,8 +61,11 @@ INSTALLED_APPS = [
     'telegram_bot.apps.TelegramBotConfig',
     "django_celery_results",
 ]
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "django-db")
+CELERY_BROKER_URL = env(
+    "CELERY_BROKER_URL",
+    default="redis://localhost:6379/0"
+)
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="django-db")
 CELERY_TIMEZONE = "UTC"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
@@ -94,7 +100,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware"
 ]
 
-cors_env = os.getenv("CORS_ALLOWED_ORIGINS", "")
+cors_env = env("CORS_ALLOWED_ORIGINS", default="")
 if cors_env:
     CORS_ALLOWED_ORIGINS = [
         x.strip() for x in cors_env.split(",") if x.strip()
@@ -131,7 +137,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 use_sqlite_for_tests = any(
     [
-        os.getenv("USE_SQLITE_FOR_TESTS") == "1",
+        env("USE_SQLITE_FOR_TESTS", default="0") == "1",
         "PYTEST_CURRENT_TEST" in os.environ,
         "pytest" in sys.argv[0],
     ]
@@ -148,11 +154,11 @@ else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": "habit_tracker",
-            "USER": "habit_user",
-            "PASSWORD": "12345",
-            "HOST": "localhost",
-            "PORT": "5432",
+            "NAME": env("POSTGRES_DB", default="habit_tracker"),
+            "USER": env("POSTGRES_USER", default="habit_user"),
+            "PASSWORD": env("POSTGRES_PASSWORD", default="12345"),
+            "HOST": env("POSTGRES_HOST", default="localhost"),
+            "PORT": env("POSTGRES_PORT", default="5432"),
         }
     }
 
@@ -203,7 +209,25 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+csrf_env = env("CSRF_TRUSTED_ORIGINS", default="")
+if csrf_env:
+    CSRF_TRUSTED_ORIGINS = [
+        origin.strip()
+        for origin in csrf_env.split(",")
+        if origin.strip()
+    ]
+
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Celery
 CELERY_ENABLE_UTC = True
